@@ -11,22 +11,56 @@ import "zeppelin-solidity/contracts/token/StandardToken.sol";
  */
 contract SimpleToken is StandardToken {
 
-    string public constant NAME = "Vesting"; // solium-disable-line uppercase
-    string public constant SYMBOL = "VES"; // solium-disable-line uppercase
-    uint8 public constant DECIMALS = 18; // solium-disable-line uppercase
+    string public name; // solium-disable-line uppercase
+    string public symbol; // solium-disable-line uppercase
+    uint8 public decimals; // solium-disable-line uppercase
 
-    /// 10 000 total tokens
-    uint256 public constant INITIAL_SUPPLY = 10000 * (10 ** uint256(DECIMALS));
+    /// Address to balances mapping for vesting accounts
+    mapping (address => uint) public vestedBalances;
+    /// Address for external allowed minter (can instead be onlyOwner)
+    address public minter;
+    /// Address for external allowed vesting of tokens
+    address public vestor;
+
+    modifier onlyMinter {
+        require(msg.sender == minter);
+        _;
+    }
+
+    /// if external vestor is used add onlyVestor
+    modifier onlyVestor {
+        require(msg.sender == vestor);
+        _;
+    }
+
+    /// Boiler plate validation check
+    modifier validAddress( address addr ) {
+        require(addr != address(0x0));
+        require(addr != address(this));
+        _;
+    }
 
     /*
 
     @dev Constructor that gives msg.sender all of existing tokens.
 
     */
-    function SimpleToken() public {
-        totalSupply_ = INITIAL_SUPPLY;
-        balances[msg.sender] = INITIAL_SUPPLY;
-        emit Transfer(0x0, msg.sender, INITIAL_SUPPLY);
+    function SimpleToken(
+        string _name
+        string _symbol
+        string _decimals
+        uint256 _initialSupply
+        address _minter
+        address _vestor
+    ) public {
+        name = _name
+        symbol = _symbol
+        decimals = _decimals
+        minter = _minter
+        vestor = _vestor
+        totalSupply = _initialSupply * (10 ** uint256(decimals));
+        balances[msg.sender] = totalSupply;
+        emit Transfer(0x0, msg.sender, totalSupply);
     }
 
     function vest(address _tokenHolder, uint _amount)
