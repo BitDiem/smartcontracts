@@ -43,19 +43,11 @@ contract AutoVestingToken is MintableToken, BurnableToken {
 
 
     function mint(address _to, uint256 _amount) onlyOwner canMint public returns (bool) {
-        bool result = super.mint(_to, _amount);
-        if (result) {
-            bonus(_to);
-        }
-        return result;
+        return super.mint(_to, _amount);
     }
 
     function burn(uint256 _value) public {
         super.burn(_value);
-        if (currentTimeIndex < bonusTimeList.length) {
-            bonus(msg.sender);
-        }
-
     }
     // --------------------------------------------------------
 
